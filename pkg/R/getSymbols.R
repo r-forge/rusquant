@@ -184,4 +184,88 @@ function (fr, return.class)
     }
 }
 
-#Get forts data here http://www.rts.ru/ru/forts/fortsresults.html
+"getSymbols.Forts" <-
+function(Symbols,env,return.class='xts',index.class='Date',
+         from='2007-01-01',
+         to=Sys.Date(),
+         adjust=FALSE,
+         period='day',
+         ...)
+{
+     importDefaults("getSymbols.Forts")
+     this.env <- environment()
+     for(var in names(list(...))) {
+        # import all named elements that are NON formals
+        assign(var, list(...)[[var]], this.env)
+     }
+
+     default.return.class <- return.class
+     default.from <- from
+     default.to <- to
+
+     if(missing(verbose)) verbose <- FALSE
+     if(missing(auto.assign)) auto.assign <- TRUE
+
+     finam.URL <- "http://www.rts.ru/ru/forts/contractresults-exp.html?"
+
+     for(i in 1:length(Symbols)) {
+
+       return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
+       return.class <- ifelse(is.null(return.class),default.return.class,
+                              return.class)
+       from <- getSymbolLookup()[[Symbols[[i]]]]$from
+       from <- if(is.null(from)) default.from else from
+       to <- getSymbolLookup()[[Symbols[[i]]]]$to
+       to <- if(is.null(to)) default.to else to
+
+       from.f <- format(as.Date(from,origin='1970-01-01'), '%Y%m%d')
+       to.f <- format(as.Date(to,origin='1970-01-01'), '%Y%m%d')
+
+       Symbols.name <- getSymbolLookup()[[Symbols[[i]]]]$name
+       Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
+       if(verbose) cat("downloading ",Symbols.name,".....\n\n")
+
+       tmp <- tempfile()
+       stock.URL <- paste(finam.URL,
+                           "day1=", from.f,
+                           "&day2=", to.f,
+                           "&isin=",gsub(' ', '%20', Symbols.name),
+                           sep='')
+
+       download.file(stock.URL, destfile=tmp, quiet=!verbose)
+
+       fr <- read.csv(tmp, as.is=TRUE)
+       unlink(tmp)
+
+       if(verbose) cat("done.\n")
+
+      fr <- xts(as.matrix(cbind(fr[,(4:7)], fr[,12]) ), as.Date(strptime(fr[,1], "%d.%m.%Y")),
+                src='forts',updated=Sys.time())
+
+       colnames(fr) <- paste(toupper(gsub('[ -.]','',Symbols.name)),
+                             c('Open','High','Low','Close', 'Volume'),
+                             sep='.')
+
+       fr <- convert.time.series(fr=fr,return.class=return.class)
+       if(is.xts(fr))
+         indexClass(fr) <- index.class
+
+       Symbols[[i]] <-toupper(gsub('[ -.]','',Symbols[[i]]))
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
+       if(i >= 5 && length(Symbols) > 5) {
+         message("pausing 1 second between requests for more than 5 symbols")
+         Sys.sleep(1)
+       }
+     }
+     if(auto.assign)
+       return(Symbols)
+
+     return(fr)
+
+}
+
+"select.hours" <-
+function(data, hour){
+    return(data[format(index(data), format="%H")==hour])
+}
