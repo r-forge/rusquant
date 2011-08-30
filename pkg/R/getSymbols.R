@@ -266,41 +266,6 @@ function(Symbols,env,return.class='xts',index.class='Date',
 }
 
 
-"getOptions" <-
-function(symbol, delivery, session='MAIN', verbose=FALSE)
-{
-     forts.URL <- "http://www.rts.ru/ru/forts/optionsdesk-csv.aspx?&sub=&marg=1"
-
-     dlv <- format(as.Date(delivery,origin='1970-01-01'), '%d-%m-%y')
-
-     sid <- 1
-     if ('EVENING' == session){
-         sid <- 2
-     }
-
-     tmp <- tempfile()
-     stock.URL <- paste(forts.URL,
-                           "&isin=",symbol,
-                           "&sid=",sid,
-                           "&delivery=",dlv,
-                           sep='')
-
-     download.file(stock.URL, destfile=tmp, quiet=!verbose)
-
-     fr <- read.csv(tmp, as.is=TRUE)
-     unlink(tmp)
-
-     fr <- as.matrix(cbind(fr[,c(1, 2, 5, 6, 8, 9,11, 12, 13, 16)]))
-
-     colnames(fr) <- paste(toupper(gsub('[ -.]','',symbol)),
-                            c('CallPositions','CallLast','CallAsk','CallBid', 'Strike', 'IV', 'PutAsk', 'PutBid', 'PutLast', 'PutPositions' ),
-                            sep='.')
-
-     return(fr)
-
-}
-
-
 "select.hours" <-
 function(data, hour){
     return(data[format(index(data), format="%H")==hour])
