@@ -41,4 +41,3 @@ function(Symbols, Exp, session='MAIN', verbose=FALSE)
 
 }
 
-getOptionChain("RTS-9.11", "2011-09-15", src="Forts")
