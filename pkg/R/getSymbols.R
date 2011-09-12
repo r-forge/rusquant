@@ -22,6 +22,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
 
      p <- 0
 
+     if ("tick" == period) p <- 1
      if ("1min" == period) p <- 2
      if ("5min" == period) p <- 3
      if ("10min" == period) p <- 4
@@ -35,8 +36,8 @@ function(Symbols,env,return.class='xts',index.class='Date',
      if (p==0) {
         message(paste("Unkown period ", period))
      }
-
-     finam.URL <- "http://195.128.78.52/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=1&MSOR=0&sep=1&sep2=1&datf=1&at=1&"
+     finam.HOST <- '195.128.78.52'
+     finam.URL <- "/table.csv?d=d&market=1&f=table&e=.csv&dtf=1&tmf=1&MSOR=0&sep=1&sep2=1&at=1&"
 
      if (!exists("finam.stock.list")){
         finam.stock.list <- loadStockList()
@@ -64,7 +65,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
        Symbols.id <- finam.stock.list[Symbols.name]
-       tmp <- tempfile()
+
        stock.URL <- paste(finam.URL,
                            "p=", p,
                            "&em=",Symbols.id,
@@ -76,24 +77,38 @@ function(Symbols,env,return.class='xts',index.class='Date',
                            "&yt=",to.y,
                            "&cn=",Symbols.name,
                            sep='')
-
-       download.file(stock.URL, destfile=tmp, quiet=!verbose)
-
+       tmp <- tempfile()
+       if (p==1){
+           lts <-  http.get(finam.HOST, paste(stock.URL, '&datf=6', sep=''),  referer='http://www.finam.ru/analysis/export/default.asp', verbose=verbose)
+           write(lts, file=tmp)
+       }else {
+           stock.URL <- paste('http://', finam.HOST, stock.URL, '&datf=1' , sep='')
+           download.file(stock.URL, destfile=tmp, quiet=!verbose)
+       }
        fr <- read.csv(tmp, as.is=TRUE)
        unlink(tmp)
 
        if(verbose) cat("done.\n")
-
-       if (p>7) {
+       if (p==1){
+            fr <- xts(as.matrix(fr[,(5:6)]), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
+                    src='finam',updated=Sys.time())
+            colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
+                             c('Close','Volume'),
+                             sep='.')
+       }else if (p>7) {
             fr <- xts(as.matrix(fr[,(5:9)]), as.Date(strptime(fr[,3], "%Y%m%d")),
                  src='finam',updated=Sys.time())
+            colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
+                             c('Open','High','Low','Close','Volume'),
+                             sep='.')
        }else {
             fr <- xts(as.matrix(fr[,(5:9)]), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
                     src='finam',updated=Sys.time())
-       }
-       colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
+            colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
+       }
+
 
        fr <- convert.time.series(fr=fr,return.class=return.class)
        if(is.xts(fr) && p>7)
@@ -269,4 +284,54 @@ function(Symbols,env,return.class='xts',index.class='Date',
 "select.hours" <-
 function(data, hour){
     return(data[format(index(data), format="%H")==hour])
+}
+
+
+http.get <- function(host, path, port=80, referer="", verbose=FALSE) {
+
+  if(missing(path))
+    path <- "/"
+  if(missing(host))
+    stop("No host URL provided")
+
+  header <- NULL
+  header <- c(header,paste("GET ", path, " HTTP/1.0\r\n", sep=""))
+  header <- c(header,"User-Agent: Mozilla/5.0 (Windows NT 6.1; WOW64; rv:6.0.2) Gecko/20100101 Firefox/6.0.2\r\n")
+  header <- c(header,"Accept: */*\r\n")
+  header <- c(header,"Accept-Encoding: deflate\r\n")
+  header <- c(header,paste("Referer: ", referer, "\r\n", sep=""))
+
+  request <- paste(header, sep="", collapse="")
+
+  if (verbose) {
+    cat("Sending HTTP GET request to ", host, ":", port, "\n")
+    cat(request, "\n")
+  }
+
+  con <- socketConnection(host=host, port=port, open="w+", blocking=TRUE, encoding="UTF-8")
+
+  on.exit(close(con))
+
+  writeLines(request, con)
+
+  response <- list()
+  response$status <- readLines(con, n=1)
+  if (verbose) {
+    write(response$status, stderr())
+    flush(stderr())
+  }
+  response$headers <- character(0)
+  repeat{
+    ss <- readLines(con, n=1)
+    if (verbose) {
+      write(ss, stderr())
+      flush(stderr())
+    }
+    if (ss == "") break
+    key.value <- strsplit(ss, ":\\s*")
+    response$headers[key.value[[1]][1]] <- key.value[[1]][2]
+  }
+  response$body = readLines(con)
+
+  return(response$body)
 }
