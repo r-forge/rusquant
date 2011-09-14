@@ -85,24 +85,24 @@ function(Symbols,env,return.class='xts',index.class='Date',
            stock.URL <- paste('http://', finam.HOST, stock.URL, '&datf=1' , sep='')
            download.file(stock.URL, destfile=tmp, quiet=!verbose)
        }
-       fr <- read.csv(tmp, as.is=TRUE)
+       fr <- read.csv(tmp, as.is=TRUE, colClasses="character")
        unlink(tmp)
 
        if(verbose) cat("done.\n")
        if (p==1){
-            fr <- xts(as.matrix(fr[,(5:6)]), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
+            fr <- xts(apply(as.matrix(fr[,(5:6)]),2, as.numeric), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
                     src='finam',updated=Sys.time())
             colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Close','Volume'),
                              sep='.')
        }else if (p>7) {
-            fr <- xts(as.matrix(fr[,(5:9)]), as.Date(strptime(fr[,3], "%Y%m%d")),
+            fr <- xts(apply(as.matrix(fr[,(5:9)]),2, as.numeric), as.Date(strptime(fr[,3], "%Y%m%d")),
                  src='finam',updated=Sys.time())
             colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
                              sep='.')
        }else {
-            fr <- xts(as.matrix(fr[,(5:9)]), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
+            fr <- xts(apply(as.matrix(fr[,(5:9)]),2,as.numeric), as.POSIXct(strptime(paste(fr[,3],fr[,4]), "%Y%m%d %H%M%S")),
                     src='finam',updated=Sys.time())
             colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Open','High','Low','Close','Volume'),
