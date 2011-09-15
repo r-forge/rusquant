@@ -95,7 +95,6 @@ function(Symbols,env,return.class='xts',index.class='Date',
             colnames(fr) <- paste(toupper(gsub('\\^','',Symbols.name)),
                              c('Close','Volume'),
                              sep='.')
-            fr <- align.time(fr, 1)
        }else if (p>7) {
             fr <- xts(apply(as.matrix(fr[,(5:9)]),2, as.numeric), as.Date(strptime(fr[,3], "%Y%m%d")),
                  src='finam',updated=Sys.time())
