@@ -43,7 +43,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
         finam.stock.list <- loadStockList()
         assign('finam.stock.list', finam.stock.list, env)
      }
-
+     fr <- NaN
      for(i in 1:length(Symbols)) {
 
        return.class <- getSymbolLookup()[[Symbols[[i]]]]$return.class
@@ -65,6 +65,12 @@ function(Symbols,env,return.class='xts',index.class='Date',
        Symbols.name <- ifelse(is.null(Symbols.name),Symbols[[i]],Symbols.name)
        if(verbose) cat("downloading ",Symbols.name,".....\n\n")
        Symbols.id <- finam.stock.list[Symbols.name]
+
+       if (is.na(Symbols.id)){
+           if (verbose)
+                cat("Don't know about",Symbols[[i]],"\n\n")
+           next
+       }
 
        stock.URL <- paste(finam.URL,
                            "p=", p,
