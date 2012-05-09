@@ -1,7 +1,7 @@
 "getOptionChain.Forts" <-
 function(Symbols, Exp, session='MAIN', verbose=FALSE)
 {
-     forts.URL <- "http://www.rts.ru/ru/forts/optionsdesk-csv.aspx?&sub=&marg=1&c2=on&c4=on&c6=on&c7=on"
+     forts.URL <- "http://rts.micex.ru/ru/derivatives/optionsdesk-csv.aspx?sub=&marg=1&c2=on&c4=on&c6=on&c7=on"
 
      dlv <- format(as.Date(Exp,origin='1970-01-01'), '%d-%m-%y')
 
@@ -12,14 +12,13 @@ function(Symbols, Exp, session='MAIN', verbose=FALSE)
 
      tmp <- tempfile()
      stock.URL <- paste(forts.URL,
-                           "&isin=",Symbols,
+                           "&code=",Symbols,
                            "&sid=",sid,
                            "&delivery=",dlv,
                            sep='')
-
      download.file(stock.URL, destfile=tmp, quiet=!verbose)
 
-     fr <- read.csv(tmp, as.is=TRUE)
+     fr <- read.csv(tmp, as.is=TRUE, skip=1)
      unlink(tmp)
 
      dlv <- format(as.Date(Exp,origin='1970-01-01'), '%d%m%y')

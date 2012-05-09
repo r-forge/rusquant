@@ -255,7 +255,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
 
        download.file(stock.URL, destfile=tmp, quiet=!verbose)
 
-       fr <- read.csv(tmp, as.is=TRUE)
+       fr <- read.csv(tmp, as.is=TRUE, skip=1)
        unlink(tmp)
 
        if(verbose) cat("done.\n")
