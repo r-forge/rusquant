@@ -83,6 +83,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
                            "&yt=",to.y,
                            "&cn=",Symbols.name,
                            sep='')
+       if (verbose) cat(stock.URL);
        tmp <- tempfile()
        if (p==1){
            lts <-  http.get(finam.HOST, paste(stock.URL, '&datf=6', sep=''),  referer='http://www.finam.ru/analysis/export/default.asp', verbose=verbose)
@@ -138,17 +139,17 @@ function(Symbols,env,return.class='xts',index.class='Date',
 
 "loadStockList" <-
 function (verbose = FALSE){
-    stocklist.URL = 'http://www.finam.ru/scripts/export.js'
+    stocklist.URL = 'http://www.finam.ru/cache/icharts/icharts.js'
     tmp <- tempfile()
     download.file(stocklist.URL, destfile=tmp,quiet=!verbose)
     fr <- readLines(con = tmp, warn=FALSE)
     unlink(tmp)
-    ids <- sub("var .*?=new Array\\(", "", fr[1])
-    ids <- sub("\\);", "", ids)
+    ids <- sub("var .*?= \\[", "", fr[1])
+    ids <- sub("\\];", "", ids)
     ids <- strsplit(ids, ",")
 
-    names <- sub("var .*?=new Array\\(", "", fr[3])
-    names <- sub("\\);", "", names)
+    names <- sub("var .*?= \\[", "", fr[3])
+    names <- sub("\\];", "", names)
     names <- gsub("'", "", names)
     names <- strsplit(names, ",")
     res <- unlist(ids)
