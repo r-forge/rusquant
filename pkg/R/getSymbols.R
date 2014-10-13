@@ -1,3 +1,142 @@
+"getSymbols.rogov" <-
+function(Symbols,env,return.class='xts',index.class='Date',
+         from='2007-01-01',
+         to=Sys.Date(),
+         adjust=FALSE,
+         period='day',
+         ...)
+{
+   importDefaults("getSymbols.rogov")
+     this.env <- environment()
+     for(var in names(list(...))) {
+        # import all named elements that are NON formals
+        assign(var, list(...)[[var]], this.env)
+     }
+	 options(warn = -1)
+     default.return.class <- return.class
+     default.from <- from
+     default.to <- to
+
+     if(missing(verbose)) verbose <- TRUE
+     if(missing(auto.assign)) auto.assign <- FALSE
+
+     p <- 0
+     if ("hour" == period) 
+		 {
+		 p <- 'Hourly' 
+		 limit<-16000
+		 }
+	if ("day" == period) 
+		 {
+		 p <- 'Daily' 
+		 limit<-16000
+		 }
+    if ("week" == period) 
+		{
+		p <- 'Weekly' 
+		limit<-10000
+		}
+    if ("month" == period)
+		{
+		p <- 'Monthly' 
+		limit<-1000
+		}
+	if ("year" == period)
+		{
+		p <- 'Annually'
+		limit<-100
+		}
+    if (p==0) 
+		 {
+			message(paste("Unkown period ", period))
+		 }
+  
+	format(as.Date(from),"%m.%d.%Y")->rogov.from
+	format(as.Date(to),"%m.%d.%Y")->rogov.to
+for(i in 1:length(Symbols)) {	
+	rogov.URL<-"http://www.rogovindex.com/Quote/searchentries?rogovindex.period="	
+	stock.URL <- paste(rogov.URL,p,"&limit=",limit,"&RegionFromDate=",rogov.from,"&regiontodate=",rogov.to,sep="")
+	tmp <- tempfile()
+    download.file(stock.URL, destfile=tmp,quiet=TRUE)
+    fr <- read.table(tmp, sep="{",header=FALSE)	 
+	as.character(unlist(fr[3:length(fr)]))->fr
+	gsub("ValueDateString:", "", fr)->fr
+	gsub("BaseValue:", "", fr)->fr
+	gsub("FValue:", "", fr)->fr
+	gsub("BValue:", "", fr)->fr
+	gsub("RValue:", "", fr)->fr
+	gsub("YValue:", "", fr)->fr
+	gsub("},", "", fr)->fr
+	gsub("}]}", "", fr)->fr		
+	t(as.data.frame(strsplit(fr,",")))->fr
+ 
+    unlink(tmp)	 	 
+    
+	if(p=='Hourly')       
+		{
+		fr <- xts(apply(as.matrix(fr[,2:6]),2, as.numeric), as.POSIXct(strptime(fr[,1], "%m/%d/%Y %I:%M:%S %p")),src='rogov',updated=Sys.time())
+		colnames(fr) <- c('Base Value','F Value','B Value','R Value','Y Value')
+		}
+	if(p=='Monthly')       
+		{
+		fr <- xts(apply(as.matrix(fr[,2:6]),2, as.numeric), as.Date(strptime(paste("01/",fr[,1],sep=""), "%d/%m/%Y")),src='rogov',updated=Sys.time())
+		colnames(fr) <- c('Base Value','F Value','B Value','R Value','Y Value')
+		} 
+	if(p=='Annually')       
+		{
+		fr <- xts(apply(as.matrix(fr[,2:6]),2, as.numeric), as.Date(strptime(paste("01/01/",fr[,1],sep=""), "%d/%m/%Y")),src='rogov',updated=Sys.time())
+		colnames(fr) <- c('Base Value','F Value','B Value','R Value','Y Value')
+		} 	 
+	 
+    if(p=='Daily' | p=='Weekly')       
+		{
+		fr <- xts(apply(as.matrix(fr[,2:6]),2, as.numeric), as.Date(strptime(fr[,1], "%m/%d/%Y")),src='rogov',updated=Sys.time())
+		colnames(fr) <- c('Base Value','F Value','B Value','R Value','Y Value')
+		}
+
+       fr <- convert.time.series(fr=fr,return.class=return.class)
+     #  if(is.xts(fr))
+     #    indexClass(fr) <- index.class
+
+       Symbols[[i]] <-toupper(gsub('\\^','',Symbols[[i]]))
+       if(auto.assign)
+         assign(Symbols[[i]],fr,env)
+       if(i >= 5 && length(Symbols) > 5) {
+         message("pausing 1 second between requests for more than 5 symbols")
+         Sys.sleep(1)
+       }
+     }
+	 print('The RogovIndex© indices and tools are proprietary to and distributed by Mikhail Rogov.' )
+	 print('All content of the Rogov Index© is proprietary to Mikhail Rogov Terms and Conditions of Access Provider at our discretion,')
+	 print('provide you with services including, but not restricted to, RogovIndex© indices and tools. ')
+	 print('You agree to comply with the conditions imposed on your use of the services, as set out in these Terms and Conditions of Access and elsewhere in our services. ')
+	 print('These services may be outside our control or provided by a third party in which in case we cannot take responsibility for their content, or for any delays,')
+	 print('interruptions or errors in the provisions of these additional services, provided we have exercised reasonable care and diligence in the selection of such ')
+	 print('providers.Certain data accessible on our services is the intellectual property of us. The data is protected by copyright and other intellectual laws ')
+	 print('and all ownership rights remain with us. You may only use the data retrieved from our services for your own purposes while accessing our services. ')
+	 print('Such use will be in accordance with these Terms and Conditions of Access and the requirements set out elsewhere on our services. You may not copy, distribute')
+	 print('or redistribute the data, including by caching, framing or similar means or sell, resell, re-transmit or otherwise make the data retrieved from our services')
+	 print('available in any manner to any third party.The data is provided "as is." We or any third party shall not be liable to you or any third party for any loss or damage,')
+	 print('direct, indirect or consequential, arising from (i) any inaccuracy or incompleteness in, or delays, interruptions, errors or omissions in the delivery of the data or any ')
+	 print('other information supplied to you through our services or (ii) any decision made or action taken by you or any third party in reliance upon the data. Third party nor we ')
+	 print('shall be liable for loss of business revenues, lost profits or any punitive, indirect, consequential, special or similar damages whatsoever, whether in contract, tort or ')
+	 print('otherwise, even if advised of the possibility of such damages incurred by you or any third party.Where the information consists of pricing or performance data, the data ')
+	 print('contained therein has been obtained from sources believed reliable. Data computations are not guaranteed by any information service provider, third party or us or any affiliates')
+	 print('and may not be complete. Neither any information service provider, third party or us give any warranties, as to the accuracy, adequacy, quality or fitness, timeless, ')
+	 print('non-infringement, title, of any information for a particular purpose or use and all such warranties are expressly excluded to the fullest extent that such warranties ')
+	 print('may be excluded by law. You bear all risk from any use or results of using any information.You are responsible for validating the integrity of any information received ')
+	 print('over the Internet.Transmission may be subject to arbitrary delays beyond our control, which may delay the provision of our services and the execution of your orders.')
+	 print('You acknowledge that neither any information service provider, third party nor we will be liable to you or any third party for any losses arising from such delay. ')
+	 print('In no event will any information provider, third party or we, be liable for any consequential loss including but not limited to special, incidental, direct or indirect ')
+	 print('damages resulting from delay or loss of use of our services. We are not responsible for any damage to your computer, software, modem, telephone or other property resulting ')
+	 print('from your use of our services.')
+     if(auto.assign)
+       return(Symbols)
+	
+	
+    return(fr)
+}
+
 "getSymbols.Finam" <-
 function(Symbols,env,return.class='xts',index.class='Date',
          from='2007-01-01',
@@ -135,7 +274,6 @@ function(Symbols,env,return.class='xts',index.class='Date',
      return(fr)
 
 }
-
 
 "getSymbols.mfd" <-
 function(Symbols,env,return.class='xts',index.class='Date',
