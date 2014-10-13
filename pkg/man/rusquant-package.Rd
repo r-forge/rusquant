@@ -21,6 +21,7 @@ Please install it along with quantmod package. To be done.
 }
 \author{
 Sergey Edunov <edunov@gmail.com>
+Vyacheslav Arbuzov <arbuzov1989@gmail.com>
 }
 \references{
 http://algorithmist.ru
