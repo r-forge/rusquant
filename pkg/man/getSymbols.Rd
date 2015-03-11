@@ -17,8 +17,8 @@ getSymbols(Symbols = NULL,  from='2007-01-01', to = Sys.Date(), src = "yahoo", p
   \item{period}{calendar periods for Finam ("tick","secs", "seconds", "mins", "hours", "days", "weeks", "months", "quarters", "years") .}	
 }
 \examples{
-getSymbols('GAZP',src='Finam')
-getSymbols('GAZP',src='mfd')
-getSymbols('a',src='rogov')
+#getSymbols('GAZP',src='Finam')
+#getSymbols('GAZP',src='mfd')
+#getSymbols('a',src='rogov')
 }
 \keyword{getSymbols}
