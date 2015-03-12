@@ -375,7 +375,7 @@ function (verbose = FALSE){
     names <- gsub("'", "", names)
     names <- strsplit(names, ",")
 	names[[1]]->names
-    names[11988]<-''
+    names[12008]<-''
     res <- unlist(ids)
 	
 	data<-data.frame(names,res,markets)
