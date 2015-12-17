@@ -273,7 +273,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
      if(missing(verbose)) verbose <- FALSE
      if(missing(auto.assign)) auto.assign <- FALSE
 
-     p <- 0
+     p <- -1
 
 	 if ("tick" == period) p <- 0
      if ("1min" == period) p <- 1
@@ -286,7 +286,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
      if ("week" == period) p <- 8
      if ("month" == period) p <- 9
 
-     if (p==0) {
+     if (p==-1) {
         message(paste("Unkown period ", period))
      }
     for(i in 1:length(Symbols)) {
