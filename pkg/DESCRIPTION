@@ -11,8 +11,10 @@ Description: This is an extension for quantmod framework to simplify working wit
 LazyLoad: yes
 License: GPL-3
 URL: http://www.algorithmist.ru/search/label/rusquant
+		http://rusquant.ru/
 		http://r-group.mifit.ru/?page_id=141
         http://r-forge.r-project.org/projects/rusquant
+		https://github.com/arbuzovv/rusquant
 Packaged:
 Repository: CRAN
 Date/Publication:
