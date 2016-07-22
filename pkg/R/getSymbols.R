@@ -5,6 +5,7 @@
  to=Sys.Date(),
  adjust=FALSE,
  period='day',
+ auto.assign=TRUE,
  ...)
 {
 	importDefaults("getSymbols.Poloniex"); #rewrite default values if specified by setDefaults
@@ -118,6 +119,7 @@
  to=Sys.Date(),
  adjust=FALSE,
  period='day',
+ auto.assign=TRUE,
  ...)
 {
   importDefaults("getSymbols.Alor"); #rewrite default values if specified by setDefaults
@@ -237,6 +239,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
          to=Sys.Date(),
          adjust=FALSE,
          period='day',
+		 auto.assign=TRUE,
          ...)
 {
    importDefaults("getSymbols.rogov")
@@ -376,6 +379,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
          to=Sys.Date(),
          adjust=FALSE,
          period='day',
+		 auto.assign=TRUE,
          ...)
 {
      importDefaults("getSymbols.Finam")
@@ -515,6 +519,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
          to=Sys.Date(),
          adjust=FALSE,
          period='day',
+		 auto.assign=TRUE,
          ...)
 {
      importDefaults("getSymbols.mfd")
@@ -699,6 +704,7 @@ function(Symbols,env,return.class='xts',index.class='Date',
          to=Sys.Date(),
          adjust=FALSE,
          period='day',
+		 auto.assign=TRUE,
          ...)
 {
      importDefaults("getSymbols.Forts")

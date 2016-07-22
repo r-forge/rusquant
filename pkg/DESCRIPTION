@@ -1,12 +1,12 @@
 Package: rusquant
 Type: Package
 Title: Financial Modelling Framework extension for Russian stock market
-Version: 0.3.9
-Date: 2014-10-16
-Author: Sergey Edunov, Vyacheslav Arbuzov
+Version: 0.4.0
+Date: 2016-07-21
+Author: Vyacheslav Arbuzov,Sergey Edunov
 Depends: quantmod
 Suggests:
-Maintainer: Sergey Edunov <edunov@gmail.com>,Vyacheslav Arbuzov <arbuzov1989@gmail.com>
+Maintainer: Vyacheslav Arbuzov <arbuzov1989@gmail.com>,Sergey Edunov <edunov@gmail.com>
 Description: This is an extension for quantmod framework to simplify working with Russian stock market
 LazyLoad: yes
 License: GPL-3

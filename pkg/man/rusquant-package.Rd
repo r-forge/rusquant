@@ -12,8 +12,8 @@ This is an extension for quantmod framework to simplify working with Russian sto
 \tabular{ll}{
 Package: \tab rusquant\cr
 Type: \tab Package\cr
-Version: \tab 1.0\cr
-Date: \tab 2011-08-07\cr
+Version: \tab 0.4.0\cr
+Date: \tab 2016-07-21\cr
 License: \tab What license is it under?\cr
 LazyLoad: \tab yes\cr
 }
@@ -25,6 +25,7 @@ Vyacheslav Arbuzov <arbuzov1989@gmail.com>
 }
 \references{
 http://algorithmist.ru
+http://rusquant.ru
 }
 \keyword{ package }
 \keyword{ russian stock market }
